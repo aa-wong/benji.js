@@ -2,14 +2,13 @@
 
 const webpack = require('webpack');
 const path = require('path');
-const env = require('yargs').argv.env; // use --env with webpack 2
 const pkg = require('./package.json');
 
 let libraryName = pkg.name;
 
 let outputFile, mode;
 
-if (env === 'build') {
+if (process.env.NODE_ENV === 'build') {
   mode = 'production';
   outputFile = libraryName + '.min.js';
 } else {

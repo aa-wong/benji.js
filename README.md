@@ -1,4 +1,4 @@
-![Benji - Developer's Best Friend in Fetch Requests](https://raw.githubusercontent.com/aa-wong/Benji/master/Benji.js-logo.png)
+![Benji - Developer's Best Friend in Fetch Requests](https://raw.githubusercontent.com/aa-wong/benji.js/master/Benji.js-logo.png)
 
 Benji is a lightweight HTTP networking library for managing simple HTTP requests in Javascript.
 
