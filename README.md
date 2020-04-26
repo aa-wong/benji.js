@@ -43,6 +43,16 @@ optional baseHeaders parameter takes in a dictionary of header parameters to be 
 ```js
 benji.baseHeaders = {'<header Key>' : '<header value>'}
 ```
+optional replacement of XMLHttpRequest object. Useful in cases of using benji.js in a node project that has no reference to XMLHttpRequest in window. Can use the node-XMLHttpRequest npm module as a replacement engine for requests.
+https://www.npmjs.com/package/xmlhttprequest
+https://github.com/driverdan/node-XMLHttpRequest
+
+```js
+
+import { XMLHttpRequest } from "xmlhttprequest";
+
+benji.xhr = new XMLHttpRequest();
+```
 
 ### HTTP Requests
 All HTTP request methods below. Each method contains a callback with optional parameters that will return if they are available.
