@@ -21,7 +21,7 @@ Import the framework into the file you wish to use in or reference it in window.
 ```js
 import {
   Benji,
-  benjiMethod
+  BenjiMethods
 } from './benji.min.js';
 ```
 
@@ -57,40 +57,38 @@ Requests supports async-await, promises or event listeners.
 ```js
 // GET
 try {
-    const res = await benji.GET('<uri>', { '<header Key>' : '<header value>' });
-    console.log(res);
+  const res = await benji.GET('<uri>', { '<header Key>' : '<header value>' });
+  console.log(res);
 } catch(e) {
-    console.error(e);
+  console.error(e);
 }
 
 // POST
 benji.POST('<uri>', { '<header Key>' : '<header value>' }, '< Body >')
-  .then(console.log)
-  .catch(console.error);
+  .then(res => console.log(res))
+  .catch(e => console.error(e));
 
 // PUT
 const res = await benji.PUT('<uri>', { '<header Key>' : '<header value>' }, '< Body >').catch(console.error);
 console.log(res);
 
 // PATCH
-benji.PATCH('<uri>', { '<header Key>' : '<header value>' }, '< Body >')
-  .then(console.log)
-  .catch(console.error);
+try {
+  const res = await benji.PATCH('<uri>', { '<header Key>' : '<header value>' }, '< Body >');
+  console.log(res);
+} catch(e) {
+  console.error(e);
+}
 
 // DELETE
-benji.DELETE('<uri>', { '<header Key>' : '<header value>' })
-    .then(console.log)
-    .catch(console.error);
+await benji.DELETE('<uri>', { '<header Key>' : '<header value>' }).catch(console.error);
 ```
 
 FETCH is a super function that is an alternative way to execute all the requests above. All that is required is to apply the appropriate requestType.
 
 ```js
-
-const type = benjiMethod.GET;
-
 try {
-    const res = await benji.FETCH(type, '<uri>', { '<header Key>' : '<header value>' }, '< Body >');
+    const res = await benji.FETCH(BenjiMethods.GET, '<uri>', { '<header Key>' : '<header value>' }, '< Body >');
     console.log(res);
 } catch(e) {
     console.error(e);
@@ -101,9 +99,8 @@ try {
 All request methods support event listeners that will executing appropriately with each requests.
 
 ```js
-
 benji
-  .onError(console.error)
-  .onSuccess(console.log);
+  .onError(e => console.error(e))
+  .onSuccess(res => console.log(res));
 
 ```
