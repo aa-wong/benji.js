@@ -22,57 +22,60 @@ const Method = Object.freeze({
 });
 
 const httpSession = (xhr, request) => {
-  let { method, url, headers, body } = request;
+  return new Promise((resolve, reject) => {
+    let { method, url, headers, body } = request;
 
-  if (!(method in Method)) {
-    return Promise.reject(new Error('Invalid method supplied.'));
-  }
-  const successCode = !body ? Method._.successCodes[method] : Method._.createSuccess[method];
+    if (!(method in Method)) {
+      return reject(new Error('Invalid method supplied.'));
+    }
+    const successCode = !body ? Method._.successCodes[method] : Method._.createSuccess[method];
 
-  xhr.open(method || Method.GET, url, true);
-  if (headers && headers.constructor === Object) {
-    for (let key in headers) {
-      if (Object.prototype.hasOwnProperty.call(headers, key)) {
-        xhr.setRequestHeader(key, headers[key]);
+    xhr.open(method || Method.GET, url, true);
+    if (headers && headers.constructor === Object) {
+      for (let key in headers) {
+        if (Object.prototype.hasOwnProperty.call(headers, key)) {
+          xhr.setRequestHeader(key, headers[key]);
+        }
       }
     }
-  }
 
-  if (body) {
-    if (headers['Content-Type'] === 'application/x-www-form-urlencoded' && typeof body !== 'string') {
-      return Promise.reject(new Error('Invalid body format.'));
-    } else if (headers['Content-Type'] === 'application/json') {
-      if (body.constructor === Object || Array.isArray(body)) {
-        body = JSON.stringify(body);
-      } else if (typeof body !== 'string') {
-        return Promise.reject(new Error('Invalid body format.'));
+    if (body) {
+      if (headers['Content-Type'] === 'application/x-www-form-urlencoded' && typeof body !== 'string') {
+        return reject(new Error('Invalid body format.'));
+      } else if (headers['Content-Type'] === 'application/json') {
+        if (body.constructor === Object || Array.isArray(body)) {
+          body = JSON.stringify(body);
+        } else if (typeof body !== 'string') {
+          return reject(new Error('Invalid body format.'));
+        }
       }
     }
-  }
 
-  xhr.onreadystatechange = () => {
-    if (xhr.readyState === 4) {
-      let res;
+    xhr.onreadystatechange = () => {
+      if (xhr.readyState === 4) {
+        let res;
 
-      try {
-        res = JSON.parse(xhr.response);
-      } catch (e) {
-        return Promise.reject(e);
+        try {
+          res = JSON.parse(xhr.response);
+        } catch (e) {
+          return reject(e);
+        }
+
+        if (xhr.status === successCode) {
+          return resolve(res);
+        }
+
+        if (res) {
+          return reject(res);
+        }
+
+        return reject(xhr.statusText);
       }
 
-      if (xhr.status === successCode) {
-        return Promise.resolve(res);
-      }
+    };
 
-      if (res) {
-        return Promise.reject(res);
-      }
-
-      return Promise.reject(xhr.statusText);
-    }
-  };
-
-  xhr.send(body);
+    xhr.send(body);
+  });
 };
 
 class Http {
@@ -235,22 +238,24 @@ class Http {
    * @return {Promise} promise object to be fulfilled in request
    */
   fetch(request) {
-    const { url, headers } = request;
+    return new Promise((resolve, reject) => {
+      const { url, headers } = request;
 
-    request.url = `${this.baseURL}${url}`;
-    if (headers) {
-      request.headers = Object.assign(this.baseHeaders, headers);
-    }
+      request.url = `${this.baseURL}${url}`;
+      if (headers) {
+        request.headers = Object.assign(this.baseHeaders, headers);
+      }
 
-    httpSession(this.xhr, request)
-      .then(res => {
-        this._handleSuccess(res);
-        return Promise.resolve(res);
-      })
-      .catch(e => {
-        this._handleError(e);
-        return Promise.reject(e);
-      });
+      httpSession(this.xhr, request)
+        .then(res => {
+          this._handleSuccess(res);
+          return resolve(res);
+        })
+        .catch(e => {
+          this._handleError(e);
+          return reject(e);
+        });
+    });
   }
 
   /**
@@ -306,7 +311,17 @@ class Http {
   }
 }
 
-export {
+const Benji = {
   Http,
   Method
 };
+
+(_export => {
+  try {
+    window.Benji = _export;
+  } catch (e) {
+    module.exports = _export;
+  }
+})(Benji);
+
+export default Benji;
